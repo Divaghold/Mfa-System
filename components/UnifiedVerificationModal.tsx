@@ -79,7 +79,7 @@ const UnifiedVerificationModal = ({
           onSuccess();
         } else {
           // fallback: go to main page
-          router.push("/");
+          router.push("/docs");
         }
       } else {
         const msg = "Invalid OTP. Please try again.";
@@ -156,7 +156,7 @@ const UnifiedVerificationModal = ({
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push("/");
+        router.push("/docs");
       }
     } catch (err) {
       console.error(err);
@@ -243,7 +243,7 @@ const UnifiedVerificationModal = ({
 
         {/* Error Message */}
         {error && (
-          <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+          <div className="p-3 bg-red border border-red-400 text-red rounded-lg text-sm">
             {error}
           </div>
         )}

@@ -31,11 +31,17 @@ const getUserByAccountId = async (accountId: string) => {
   const result = await databases.listDocuments(
     appwriteConfig.databaseId,
     appwriteConfig.usersCollectionId,
-    [Query.equal("accountId", [accountId])]
+    [
+      Query.or([
+        Query.equal("accountId", [accountId]),
+        Query.equal("userId", [accountId]),
+      ]),
+    ]
   );
 
   return result.total > 0 ? result.documents[0] : null;
 };
+
 
 const handleError = (error: unknown, message: string) => {
   console.error(message, error);
@@ -148,7 +154,7 @@ export const verifySecret = async ({
     const session = await account.createSession(accountId, password);
 
     (await cookies()).set("appwrite-session", session.secret, {
-      path: "/",
+      path: "/docs",
       httpOnly: true,
       sameSite: "strict",
       secure: true,
@@ -168,7 +174,7 @@ export const verifySecret = async ({
 export const createPasskeySession = async (accountId: string): Promise<ServerResult<{ accountId: string }>> => {
   try {
     (await cookies()).set("app-session", accountId, {
-      path: "/",
+      path: "/docs",
       httpOnly: true,
       sameSite: "strict",
       secure: true,
@@ -237,7 +243,7 @@ export const signOutUser = async (): Promise<ServerResult<null>> => {
     console.error("Failed to sign out user", error);
     return { success: false, error: (error instanceof Error && error.message) || "Failed to sign out user" };
   } finally {
-    redirect("/auth");
+    redirect("/sign-in");
   }
 };
 

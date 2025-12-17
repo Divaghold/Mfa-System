@@ -239,7 +239,7 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
             toast.success("Signed in", {
               description: "Signed in with passkey successfully ✅",
             });
-            router.push("/");
+            router.push("/docs");
             return;
           } catch (err) {
             console.warn("Passkey sign-in failed:", err);
@@ -578,8 +578,8 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
                   />
                   <h1 className="text-3xl font-bold">Hello, Friend!</h1>
                   <p className="mt-4">
-                    To keep connecting with us, please login with your personal
-                    info. Need quick authentication?
+                    login to connect with us, need quick authentication? Use Passkeys for a faster
+                    sign-in experience.
                   </p>
                 </div>
                 <Button
@@ -602,11 +602,10 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
                   />
                   <h1 className="text-3xl font-bold">Welcome Back!</h1>
                   <p className="mt-4">
-                    Try our improved feature: register your biometrics and make
+                   Try our improved feature: register your biometrics and make
                     sign-up faster. Your security, our priority.
                   </p>
                 </div>
-
                 <Button
                   variant="outline"
                   className="mt-6 text-white border-[#45f3ff] bg-transparent"
@@ -628,7 +627,7 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
           hasPasskey={hasPasskey}
           onSuccess={() => {
             toast.success("Signed in", { description: "Welcome back!" });
-            router.push("/");
+            router.push("/docs");
           }}
         />
       )}
