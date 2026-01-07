@@ -10,7 +10,7 @@ const nextConfig = {
       bodySizeLimit: "100MB",
       allowedOrigins: [
         "localhost:3000",
-        "lhjw2t15-3000.uks1.devtunnels.ms",
+        "mfa-system-nine.vercel.app",
       ],
     },
   },

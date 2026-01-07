@@ -392,16 +392,16 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
                     <FormItem className="w-4/5 md:w-[265px] max-sm:w-[205px] mt-6">
                       <FormLabel className="text-white">Email</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Enter your email"
-                          className="
-                          mt-1 bg-transparent border-white text-white
-        
-                        "
-                          {...field}
-                        />
+                  <Input
+                           placeholder="Enter your email"
+                           className={`
+                           mt-1 bg-transparent text-white max-md:w-[95%]
+                          ${form.formState.errors.email ? "border-red-500" : "border-white"}
+                        `}
+                  {...field}
+                   />
                       </FormControl>
-                      <FormMessage className="text-red-400 text-sm" />
+                      <FormMessage className="text-error text-sm" />
                     </FormItem>
                   )}
                 />
@@ -431,7 +431,7 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
                   className="text-gray-300 text-sm mt-2 max-md:mt-3"
                 >
                   Don’t have an account?{" "}
-                  <span className="max-sm:mt-2 max-sm:cursor-pointer max-sm:text-[#45f3ff]">
+                  <span className="hidden max-sm:mt-2 max-sm:cursor-pointer max-sm:text-[#45f3ff]">
                     sign up
                   </span>
                 </Link>
@@ -503,11 +503,11 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
                       <FormControl>
                         <Input
                           placeholder="Enter your full name"
-                          className="mt-1 bg-transparent border-white text-white  max-md:w-[95%]"
+                          className="mt-1 bg-transparent border-white text-white max-md:w-[95%]"
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage className="text-red-400 text-sm" />
+                      <FormMessage className="text-error text-sm" />
                     </FormItem>
                   )}
                 />
@@ -519,20 +519,23 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
                     <FormItem className="w-4/5 mt-4">
                       <FormLabel className="text-white">Email</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Enter your email"
-                          className="mt-1 bg-transparent border-white text-white  max-md:w-[95%]"
-                          {...field}
-                        />
+                           <Input
+                           placeholder="Enter your email"
+                           className={`
+                           mt-1 bg-transparent text-white max-md:w-[95%]
+                          ${form.formState.errors.email ? "border-red-500" : "border-white"}
+                        `}
+                  {...field}
+                   />
                       </FormControl>
-                      <FormMessage className="text-red-400 text-sm" />
+                      <FormMessage className="text-error text-sm" />
                     </FormItem>
                   )}
                 />
 
                 <Link href="/sign-in" className="text-gray-300 text-sm mt-2">
                   Already have an account?{" "}
-                  <span className="max-sm:mt-2 max-sm:cursor-pointer max-sm:text-[#45f3ff]">
+                  <span className="hidden max-sm:mt-2 max-sm:cursor-pointer max-sm:text-[#45f3ff]">
                     sign in
                   </span>
                 </Link>

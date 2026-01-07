@@ -13,6 +13,8 @@ export type ServerResult<T = any> =
   | { success: true; data: T }
   | { success: false; error: string };
 
+
+
 const getUserByEmail = async (email: string) => {
   const { databases } = await createAdminClient();
 
@@ -140,30 +142,43 @@ export const signInUser = async ({ email }: { email: string }): Promise<ServerRe
 /**
  * Verify OTP and create Appwrite session (uses Appwrite sessions — valid only for OTP/email)
  */
+
 export const verifySecret = async ({
   accountId,
   password,
 }: {
   accountId: string;
   password: string;
-}): Promise<ServerResult<{ sessionId: string }>> => {
+}) => {
   try {
     const { account } = await createAdminClient();
 
-    // This is an Appwrite session creation that expects a valid secret (OTP token or password)
+    // ✅ Create Appwrite session using OTP
     const session = await account.createSession(accountId, password);
 
-    (await cookies()).set("appwrite-session", session.secret, {
-      path: "/docs",
+    // ✅ Store SESSION ID (not secret)
+    cookies().set("appwrite-session", session.$id, {
+      path: "/",
       httpOnly: true,
       sameSite: "strict",
       secure: true,
     });
 
-    return { success: true, data: { sessionId: session.$id } };
-  } catch (error) {
+
+    return {
+      success: true,
+      data: { sessionId: session.$id },
+    };
+  } catch (error: any) {
     console.error("Failed to verify OTP", error);
-    return { success: false, error: (error instanceof Error && error.message) || "Failed to verify OTP" };
+
+    return {
+      success: false,
+      message:
+        error?.response?.message ||
+        error?.message ||
+        "Failed to verify OTP",
+    };
   }
 };
 

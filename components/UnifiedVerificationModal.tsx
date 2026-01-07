@@ -24,7 +24,7 @@ import {
 } from "@/lib/actions/auth.actions";
 import { useRouter } from "next/navigation";
 import { beginPasskeyLogin, finishPasskeyLogin } from "@/lib/appwrite/passkey";
-import { toast } from "sonner"; // 👈 NEW
+import { toast } from "sonner";
 
 type VerificationMethod = "otp" | "passkey";
 
@@ -32,7 +32,7 @@ interface UnifiedVerificationModalProps {
   accountId: string;
   email: string;
   hasPasskey?: boolean;
-  onSuccess?: () => void; // 👈 NEW
+  onSuccess?: () => void;
 }
 
 const UnifiedVerificationModal = ({
@@ -43,126 +43,62 @@ const UnifiedVerificationModal = ({
 }: UnifiedVerificationModalProps) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
-  const [method, setMethod] = useState<VerificationMethod>("otp");
+  const [method] = useState<VerificationMethod>("otp");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   /**
    * Handle OTP verification
-   */
-  const handleOtpSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+   */ const handleOtpSubmit = async (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
     try {
-      if (!otp || otp.length !== 6) {
-        const msg = "Please enter a valid 6-digit OTP";
+      // ✅ Validate input length
+      if (otp.length !== 6) {
+        const msg = "Please enter the 6-digit code sent to your email.";
         setError(msg);
-        toast.error("Invalid OTP", { description: msg });
-        setIsLoading(false);
+        toast.error("Invalid input", { description: msg });
         return;
       }
 
-      const sessionId = await verifySecret({ accountId, password: otp });
+      // ✅ Call server action to verify OTP
+      const result = await verifySecret({ accountId, password: otp });
 
-      if (sessionId) {
-        toast.success("OTP verified", {
-          description: "You are now signed in.",
-        });
+      // ❌ OTP invalid
+      if (!result.success) {
+        const msg =
+          result.message === "Invalid token passed in the request."
+            ? "Invalid OTP. Please enter the correct code sent to your email."
+            : result.message;
 
-        setIsOpen(false);
-
-        // If parent passed a callback, let it handle redirect/toast
-        if (onSuccess) {
-          onSuccess();
-        } else {
-          // fallback: go to main page
-          router.push("/docs");
-        }
-      } else {
-        const msg = "Invalid OTP. Please try again.";
         setError(msg);
-        toast.error("Invalid OTP", { description: msg });
-      }
-    } catch (error) {
-      console.log("Failed to verify OTP", error);
-      const msg = "Invalid OTP. Please try again.";
-      setError(msg);
-      toast.error("OTP verification failed", { description: msg });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  /**
-   * Handle Passkey verification
-   */
-  const handlePasskeyLogin = async () => {
-    setIsLoading(true);
-    setError("");
-
-    try {
-      // Step 1: Get challenge from server
-      const start = await beginPasskeyLogin();
-      const publicKey = start.publicKey;
-
-      // Step 2: Browser WebAuthn - get credential
-      const credential = (await navigator.credentials.get({
-        publicKey,
-      })) as PublicKeyCredential | null;
-
-      if (!credential) {
-        const msg = "Passkey authentication cancelled or not available";
-        setError(msg);
-        toast.error("Passkey cancelled", { description: msg });
-        setIsLoading(false);
+        toast.error("OTP verification failed", { description: msg });
         return;
       }
 
-      const assertionResponse =
-        credential.response as AuthenticatorAssertionResponse;
-
-      // Step 3: Send back to Appwrite
-      await finishPasskeyLogin({
-        passkeyId: credential.id,
-        clientDataJSON: btoa(
-          String.fromCharCode(
-            ...Array.from(new Uint8Array(assertionResponse.clientDataJSON))
-          )
-        ),
-        authenticatorData: btoa(
-          String.fromCharCode(
-            ...Array.from(new Uint8Array(assertionResponse.authenticatorData))
-          )
-        ),
-        signature: btoa(
-          String.fromCharCode(
-            ...Array.from(new Uint8Array(assertionResponse.signature))
-          )
-        ),
-      });
-
-      // Step 4: Create session
-      await createPasskeySession(accountId);
-
-      toast.success("Passkey authenticated", {
+      // ✅ OTP valid → show success and navigate
+      toast.success("OTP verified", {
         description: "You are now signed in.",
       });
 
-      setIsOpen(false);
-
+      // Redirect or call parent success handler
       if (onSuccess) {
         onSuccess();
       } else {
         router.push("/docs");
       }
-    } catch (err) {
-      console.error(err);
-      const msg = "Passkey authentication failed. Please try again.";
+    } catch (err: any) {
+      const msg =
+        err?.response?.message ||
+        err?.message ||
+        "Failed to verify OTP. Please try again.";
       setError(msg);
-      toast.error("Passkey authentication failed", { description: msg });
+      toast.error("OTP verification failed", { description: msg });
     } finally {
       setIsLoading(false);
     }
@@ -174,12 +110,14 @@ const UnifiedVerificationModal = ({
   const handleResendOtp = async () => {
     try {
       await sendEmailOTP({ email });
+      setOtp(""); // ✅ reset input
       setError("");
+
       toast.success("OTP resent", {
         description: `A new code has been sent to ${email}`,
       });
     } catch (error) {
-      const msg = "Failed to resend OTP";
+      const msg = "Failed to resend OTP. Please try again.";
       setError(msg);
       toast.error("Resend failed", { description: msg });
     }
@@ -202,154 +140,78 @@ const UnifiedVerificationModal = ({
               className="otp-close-button cursor-pointer"
             />
           </div>
-          <AlertDialogDescription className="subtitle-2 text-center text-light-100">
-            Choose your preferred verification method
+          <AlertDialogDescription className="subtitle-2 text-center">
+            Enter the verification code sent to your email
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {/* Verification Method Tabs */}
-        {/* <div className="flex gap-2 mb-4">
-          <button
-            onClick={() => {
-              setMethod("otp");
-              setError("");
-              setOtp("");
-            }}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
-              method === "otp"
-                ? "bg-brand text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
-          >
-            📧 Email OTP
-          </button>
-
-          {hasPasskey && (
-            <button
-              onClick={() => {
-                setMethod("passkey");
-                setError("");
-              }}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
-                method === "passkey"
-                  ? "bg-brand text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              👆 Passkey
-            </button>
-          )}
-        </div> */}
-
-        {/* Error Message */}
+        {/* ❌ Error message */}
         {error && (
-          <div className="p-3 bg-red border border-red-400 text-red rounded-lg text-sm">
+          <div className="rounded-lg border border-red-400 bg-transparent p-3 text-sm text-error">
             {error}
           </div>
         )}
 
-        {/* OTP Method */}
-        {method === "otp" && (
-          <>
-            <div className="space-y-4">
-              <p className="text-sm text-gray-600">
-                We&apos;ve sent a 6-digit code to{" "}
-                <span className="font-semibold text-[#45f3ff]">{email}</span>
-              </p>
+        {/* OTP Section */}
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600 text-center">
+            We&apos;ve sent a 6-digit code to{" "}
+            <span className="font-semibold text-[#45f3ff]">{email}</span>
+          </p>
 
-              <InputOTP maxLength={6} value={otp} onChange={setOtp}>
-                <InputOTPGroup className="shad-otp">
-                  <InputOTPSlot index={0} className="shad-otp-slot" />
-                  <InputOTPSlot index={1} className="shad-otp-slot" />
-                  <InputOTPSlot index={2} className="shad-otp-slot" />
-                  <InputOTPSlot index={3} className="shad-otp-slot" />
-                  <InputOTPSlot index={4} className="shad-otp-slot" />
-                  <InputOTPSlot index={5} className="shad-otp-slot" />
-                </InputOTPGroup>
-              </InputOTP>
+          <InputOTP
+            maxLength={6}
+            value={otp}
+            onChange={(value) => {
+              // ✅ digits only
+              if (/^\d*$/.test(value)) {
+                setOtp(value);
+                setError("");
+              }
+            }}
+          >
+            <InputOTPGroup className="shad-otp">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <InputOTPSlot key={i} index={i} className="shad-otp-slot" />
+              ))}
+            </InputOTPGroup>
+          </InputOTP>
+        </div>
+
+        <AlertDialogFooter>
+          <div className="flex w-full flex-col gap-4">
+            <AlertDialogAction
+              onClick={handleOtpSubmit}
+              className="shad-submit-btn h-12"
+              type="button"
+              disabled={isLoading || otp.length !== 6}
+            >
+              Verify OTP
+              {isLoading && (
+                <Image
+                  src="/assets/icons/loader.svg"
+                  alt="loader"
+                  width={24}
+                  height={24}
+                  className="ml-2 animate-spin"
+                />
+              )}
+            </AlertDialogAction>
+
+            <div className="subtitle-2 text-center">
+              Didn&apos;t get a code?
+              <Button
+                type="button"
+                variant="link"
+                className="pl-1 text-[#45f3ff]"
+                onClick={handleResendOtp}
+                disabled={isLoading}
+              >
+                Click to resend
+              </Button>
             </div>
-
-            <AlertDialogFooter>
-              <div className="flex w-full flex-col gap-4">
-                <AlertDialogAction
-                  onClick={handleOtpSubmit}
-                  className="shad-submit-btn h-12"
-                  type="button"
-                  disabled={isLoading || otp.length !== 6}
-                >
-                  Verify OTP
-                  {isLoading && (
-                    <Image
-                      src="/assets/icons/loader.svg"
-                      alt="loader"
-                      width={24}
-                      height={24}
-                      className="ml-2 animate-spin"
-                    />
-                  )}
-                </AlertDialogAction>
-
-                <div className="subtitle-2 mt-2 text-center text-light-100">
-                  Didn&apos;t get a code?
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="pl-1 text-[#45f3ff]"
-                    onClick={handleResendOtp}
-                    disabled={isLoading}
-                  >
-                    Click to resend
-                  </Button>
-                </div>
-              </div>
-            </AlertDialogFooter>
-          </>
-        )}
-
-        {/* Passkey Method */}
-        {method === "passkey" && (
-          <>
-            <div className="space-y-4">
-              <p className="text-sm text-gray-600">
-                Use your registered passkey (fingerprint, face, or security
-                key) to verify your identity.
-              </p>
-
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  💡 Passkey verification is faster and more secure than OTP.
-                </p>
-              </div>
-            </div>
-
-            <AlertDialogFooter>
-              <div className="flex w-full flex-col gap-4">
-                <AlertDialogAction
-                  onClick={handlePasskeyLogin}
-                  className="shad-submit-btn h-12"
-                  type="button"
-                  disabled={isLoading}
-                >
-                  Authenticate with Passkey
-                  {isLoading && (
-                    <Image
-                      src="/assets/icons/loader.svg"
-                      alt="loader"
-                      width={24}
-                      height={24}
-                      className="ml-2 animate-spin"
-                    />
-                  )}
-                </AlertDialogAction>
-
-                <p className="text-xs text-center text-gray-500">
-                  Make sure your device is unlocked and ready for biometric
-                  authentication.
-                </p>
-              </div>
-            </AlertDialogFooter>
-          </>
-        )}
+          </div>
+        </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );

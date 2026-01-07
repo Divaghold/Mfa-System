@@ -1,9 +1,10 @@
 "use client"
 
-import {signOutUser} from "@/lib/actions/auth.actions";
+import {signOutUser, getCurrentUser} from "@/lib/actions/auth.actions";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
+
 
 interface Props {
   fullName: string;
@@ -13,6 +14,7 @@ interface Props {
 
 const DocsPage = ({ fullName, avatar, email }: Props) => {
   const pathname = usePathname();
+
 
   return (
     <main className="min-h-screen bg-[#0b0f14] text-white max-w-5xl mx-auto px-6 py-10">
