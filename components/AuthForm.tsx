@@ -84,7 +84,9 @@ const authFormSchema = (formType: FormType) =>
   z.object({
     email: z.string().email({ message: "Invalid email address" }),
     fullName:
-      formType === "sign-up" ? z.string().min(2).max(50) : z.string().optional(),
+      formType === "sign-up"
+        ? z.string().min(2).max(50)
+        : z.string().optional(),
   });
 
 /* ----------------------
@@ -105,7 +107,9 @@ async function registerPasskeyOnClient(
   const options = optsRes.data as WebAuthnOptions;
 
   // Browser API: start registration
-  const attResp = (await startRegistration(options as any)) as RegistrationResponseJSON;
+  const attResp = (await startRegistration(
+    options as any
+  )) as RegistrationResponseJSON;
 
   // Verify on server (returns ServerResult<{ verified: boolean }>)
   const verifyRes = (await verifyWebAuthnRegistration({
@@ -139,14 +143,18 @@ async function registerPasskeyOnClient(
 
 async function loginWithPasskey(accountId: string): Promise<boolean> {
   // Get login options from server
-  const optsRes = (await getWebAuthnLoginOptions({ accountId })) as ServerResult<Record<string, any>>;
+  const optsRes = (await getWebAuthnLoginOptions({
+    accountId,
+  })) as ServerResult<Record<string, any>>;
   if (!optsRes.success) {
     throw new Error(optsRes.error || "Failed to get login options");
   }
   const options = optsRes.data as WebAuthnOptions;
 
   // Browser API: start authentication
-  const assertion = (await startAuthentication(options as any)) as AuthenticationResponseJSON;
+  const assertion = (await startAuthentication(
+    options as any
+  )) as AuthenticationResponseJSON;
 
   // Verify on server
   const verifyRes = (await verifyWebAuthnLogin({
@@ -162,7 +170,9 @@ async function loginWithPasskey(accountId: string): Promise<boolean> {
   }
 
   // Create custom passkey session (server sets app-session cookie)
-  const sessionRes = (await createPasskeySession(accountId)) as ServerResult<CreatePasskeySessionData>;
+  const sessionRes = (await createPasskeySession(
+    accountId
+  )) as ServerResult<CreatePasskeySessionData>;
   if (!sessionRes.success) {
     throw new Error(sessionRes.error || "Failed to create passkey session");
   }
@@ -174,7 +184,11 @@ async function loginWithPasskey(accountId: string): Promise<boolean> {
 /* ----------------------
    Component
    ---------------------- */
-const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.Element => {
+const AuthForm = ({
+  type: initialType = "sign-in",
+}: {
+  type?: FormType;
+}): JSX.Element => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [accountId, setAccountId] = useState<string | null>(null);
   const [hasPasskey, setHasPasskey] = useState<boolean>(false);
@@ -208,7 +222,9 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
     try {
       // SIGN-IN FLOW
       if (panel === "sign-in") {
-        const res = (await signInUser({ email: values.email })) as ServerResult<SignInUserData>;
+        const res = (await signInUser({
+          email: values.email,
+        })) as ServerResult<SignInUserData>;
 
         if (!res.success) {
           toast.error(res.error || "Sign-in failed");
@@ -276,7 +292,8 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
           await registerPasskeyOnClient(createRes.data.accountId, values.email);
           setHasPasskey(true);
           toast.success("Passkey registered", {
-            description: "Your biometrics were registered successfully. Please sign in.",
+            description:
+              "Your biometrics were registered successfully. Please sign in.",
           });
         } catch (err) {
           console.error("Passkey registration failed:", err);
@@ -392,14 +409,14 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
                     <FormItem className="w-4/5 md:w-[265px] max-sm:w-[205px] mt-6">
                       <FormLabel className="text-white">Email</FormLabel>
                       <FormControl>
-                  <Input
-                           placeholder="Enter your email"
-                           className={`
+                        <Input
+                          placeholder="Enter your email"
+                          className={`
                            mt-1 bg-transparent text-white max-md:w-[95%]
-                          ${form.formState.errors.email ? "border-red-500" : "border-white"}
+                          ${form.formState.errors.email ? "border-error" : "border-white"}
                         `}
-                  {...field}
-                   />
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage className="text-error text-sm" />
                     </FormItem>
@@ -519,14 +536,14 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
                     <FormItem className="w-4/5 mt-4">
                       <FormLabel className="text-white">Email</FormLabel>
                       <FormControl>
-                           <Input
-                           placeholder="Enter your email"
-                           className={`
+                        <Input
+                          placeholder="Enter your email"
+                          className={`
                            mt-1 bg-transparent text-white max-md:w-[95%]
-                          ${form.formState.errors.email ? "border-red-500" : "border-white"}
+                          ${form.formState.errors.email ? "border-error" : "border-white"}
                         `}
-                  {...field}
-                   />
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage className="text-error text-sm" />
                     </FormItem>
@@ -581,8 +598,8 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
                   />
                   <h1 className="text-3xl font-bold">Hello, Friend!</h1>
                   <p className="mt-4">
-                    login to connect with us, need quick authentication? Use Passkeys for a faster
-                    sign-in experience.
+                    login to connect with us, need quick authentication? Use
+                    Passkeys for a faster sign-in experience.
                   </p>
                 </div>
                 <Button
@@ -595,7 +612,6 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
               </>
             ) : (
               <>
-
                 <div>
                   <img
                     src="/images/hexagon.svg"
@@ -605,7 +621,7 @@ const AuthForm = ({ type: initialType = "sign-in" }: { type?: FormType }): JSX.E
                   />
                   <h1 className="text-3xl font-bold">Welcome Back!</h1>
                   <p className="mt-4">
-                   Try our improved feature: register your biometrics and make
+                    Try our improved feature: register your biometrics and make
                     sign-up faster. Your security, our priority.
                   </p>
                 </div>
