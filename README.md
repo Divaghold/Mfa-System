@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+A Multifactor Authentication System
 
-## Getting Started
+The component implements a dual-panel authentication form (sign-in and sign-up) with support for OTP (One-Time Password) and WebAuthn-based passkey authentication. It features animated UI transitions, responsive design, and integrates with server-side actions for user management.
 
-First, run the development server:
+Overview
+The AuthForm is a client-side React component built with Next.js. It renders a visually appealing authentication interface with neon-style animations, allowing users to sign in or sign up using email-based OTP or biometric passkeys. The component handles form validation, API interactions, and state management for a seamless user experience.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Key functionalities:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Dual Panels: Toggle between sign-in and sign-up modes.
+Authentication Methods: OTP via email or passkey (WebAuthn).
+Responsive Design: Adapts to desktop, tablet, and mobile layouts.
+Animations: Uses Framer Motion for rotating neon effects and panel transitions.
+Form Validation: Powered by Zod and React Hook Form.
+Server Integration: Communicates with backend actions for account creation, sign-in, and passkey management.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+UI Rendering
+The component renders a full-screen container with a neon-animated frame:
+<img width="1144" height="573" alt="Screenshot (1017)" src="https://github.com/user-attachments/assets/4f2fe937-9f43-4263-acfa-8926151b2865" />
+<img width="1094" height="596" alt="Screenshot (1014)" src="https://github.com/user-attachments/assets/6e638662-80c1-42be-92df-3c7633be000b" />
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Outer Frame: A responsive div with rotating gradient borders for a "neon" effect using Framer Motion.
+Inner Container: A gradient background with two panels (sign-in and sign-up) and an overlay.
+Panels
+Sign-In Panel: Form with email input, OTP/Passkey toggle buttons, and submit button. Includes a link to sign-up.
+Sign-Up Panel: Form with full name and email inputs, submit button, and a link to sign-in.
+Overlay Panel (Desktop only): Displays promotional text and a toggle button to switch panels.
+Responsiveness
+Desktop/Tablet: Side-by-side panels with sliding animations.
+Mobile: Stacked panels with fade transitions.
+Uses Tailwind CSS classes for sizing and positioning.
+Modal Integration
+The UnifiedVerificationModal appears when accountId is set (after OTP sign-in), handling email verification and redirecting on success.
+Key Features and Behaviors
+Animations: Continuous rotation of neon borders; smooth panel transitions.
+Error Handling: Comprehensive try-catch blocks with user-friendly toasts.
+Security: WebAuthn ensures secure, passwordless authentication.
+Accessibility: Form labels, error messages, and responsive design.
+Customization: Easily extensible for additional auth methods or UI tweaks.
