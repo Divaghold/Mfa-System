@@ -20,7 +20,6 @@ The component renders a full-screen container with a neon-animated frame:
 <img width="1144" height="573" alt="Screenshot (1017)" src="https://github.com/user-attachments/assets/4f2fe937-9f43-4263-acfa-8926151b2865" />
 <img width="1094" height="596" alt="Screenshot (1014)" src="https://github.com/user-attachments/assets/6e638662-80c1-42be-92df-3c7633be000b" />
 
-
 Outer Frame: A responsive div with rotating gradient borders for a "neon" effect using Framer Motion.
 Inner Container: A gradient background with two panels (sign-in and sign-up) and an overlay.
 Panels
@@ -30,9 +29,11 @@ Overlay Panel (Desktop only): Displays promotional text and a toggle button to s
 Responsiveness
 Desktop/Tablet: Side-by-side panels with sliding animations.
 Mobile: Stacked panels with fade transitions.
-Uses Tailwind CSS classes for sizing and positioning.
-Modal Integration
-The UnifiedVerificationModal appears when accountId is set (after OTP sign-in), handling email verification and redirecting on success.
+Uses Tailwind CSS classes for sizing and positioning
+Modal Integration you can view app demo 
+<a href="https://mfa-system-nine.vercel.app/sign-in">here<a/>
+
+
 Key Features and Behaviors
 Animations: Continuous rotation of neon borders; smooth panel transitions.
 Error Handling: Comprehensive try-catch blocks with user-friendly toasts.
